@@ -18,7 +18,7 @@ namespace Engine.Tests.Unit
 		public void SingleItem()
 		{
 			var item = new MultipleChoiceItem(RedCarpet, GreenCarpet, NoCarpet);
-			var checklist = new Checklist( creator, item);
+			var checklist = new Checklist(creator, item);
 			Assert.Equal(ChecklistStatus.InProgress, checklist.Status());
 			creator.Sets(item).To(GreenCarpet);
 			Assert.Equal(ChecklistStatus.Succeeded, checklist.Status());
@@ -31,7 +31,7 @@ namespace Engine.Tests.Unit
 		public void EmptyChecklist()
 		{
 			var item = new MultipleChoiceItem(RedCarpet);
-			var checklist = new Checklist( creator, item);
+			var checklist = new Checklist(creator, item);
 			Assert.Equal(ChecklistStatus.InProgress, checklist.Status());
 			creator.Cancel(item).In(checklist);
 			Assert.Equal(ChecklistStatus.NotApplicable, checklist.Status());
@@ -42,7 +42,7 @@ namespace Engine.Tests.Unit
 			var item1 = new MultipleChoiceItem(RedCarpet, GreenCarpet, NoCarpet);
 			var item2 = new BooleanItem();
 			var item3 = new MultipleChoiceItem("India", "Iceland", "Norway");
-			var checklist = new Checklist( creator, item1, item2, item3);
+			var checklist = new Checklist(creator, item1, item2, item3);
 
 			Assert.Equal(ChecklistStatus.InProgress, checklist.Status());
 			creator.Sets(item1).To(GreenCarpet);
@@ -53,6 +53,19 @@ namespace Engine.Tests.Unit
 			Assert.Equal(ChecklistStatus.Failed, checklist.Status());
 		}
 
+		[Fact]
+		public void ReplaceItem()
+		{
+            var item1 = new MultipleChoiceItem(RedCarpet, GreenCarpet, NoCarpet);
+            var item2 = new BooleanItem();
+            var item3 = new MultipleChoiceItem("India", "Iceland", "Norway");
+            var checklist = new Checklist(creator, item1, item2, item3);
+            Assert.Equal(ChecklistStatus.InProgress, checklist.Status());
+            var item4 = new MultipleChoiceItem("car", "Bike", "Bus");
+            var item5 = item2.Not();
+            creator.Replace(item2).With(item4, item5).In(checklist);
+
+        }
 	}
 	internal enum CarpetColor
 	{

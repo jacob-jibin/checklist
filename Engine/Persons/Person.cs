@@ -19,6 +19,11 @@ namespace Engine.Persons
 
         public CancelValidation Cancel(Item item) => new CancelValidation(this, item);
 
+        public ReplaceItemValidation Replace(Item itemTobeReplaced)
+        {
+            return new ReplaceItemValidation(this, itemTobeReplaced);
+        }
+
         public void Reset(Item item)
         {
             if (!this.Can(Set).On(item))
@@ -68,7 +73,7 @@ namespace Engine.Persons
 
             public void To(Item item)
             {
-                if (!_addingPerson.Can(AddPerson).On(item))
+                if (!_addingPerson.Can(Operation.AddPerson).On(item))
                     throw new InvalidOperationException("Does not have permission to add new person");
                 item.AddPerson(_addedPerson, _role);
 
@@ -109,7 +114,7 @@ namespace Engine.Persons
             {
                 if (!checklist.Contains(_item))
                     throw new InvalidOperationException("Item is not present in the Checklist");
-                if (!_person.Can(Operation.Cancel).On(_item))
+                if (!_person.Can(ModifyChecklist).On(_item))
                     throw new InvalidOperationException("Does not have permission to modify an Item");
                 checklist.Cancel(_item);
             }
@@ -129,9 +134,38 @@ namespace Engine.Persons
 
             public void In(Checklist checklist)
             {
-                if (!_person.Can(AddItem).To(checklist))
+                if (!_person.Can(ModifyChecklist).To(checklist))
                     throw new InvalidOperationException("Does not have permission to Add to the checklist");
                 checklist.Add(_items.ToArray<Item>());
+            }
+        }
+
+        public class ReplaceItemValidation
+        {
+            private readonly Person _person;
+            private readonly Item _itemToBeReplaced;
+            private List<Item> _newItems;
+
+            internal ReplaceItemValidation(Person person, Item item)
+            {
+                _person = person;
+                _itemToBeReplaced = item;
+            }
+
+            public void In(Checklist checklist)
+            {
+                if(!checklist.Contains(_itemToBeReplaced))
+                    throw new InvalidOperationException("Item is not present in the Checklist");
+                if (!_person.Can(ModifyChecklist).To(checklist))
+                    throw new InvalidOperationException("Does not have permission to modify an Item");
+                checklist.Replace(_itemToBeReplaced, _newItems.ToArray<Item>());
+            }
+
+            public ReplaceItemValidation With(Item firstItem, params Item[] items)
+            {
+                _newItems = items.ToList();
+                _newItems.Insert(0, firstItem);
+                return this;
             }
         }
     }
