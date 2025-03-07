@@ -1,5 +1,6 @@
 ﻿using Engine.Items;
 using Engine.Persons;
+using System;
 using Xunit;
 using static Engine.Items.ChecklistStatus;
 
@@ -22,6 +23,7 @@ namespace Engine.Tests.Unit
             Assert.Equal(Succeeded, checklist.Status());
             creator.Reset(booleanItem);
             Assert.Equal(InProgress, checklist.Status());
+            Assert.Throws<InvalidOperationException>(() => creator.Sets(notItem).To(true));
         }
 
         [Fact]
@@ -38,7 +40,7 @@ namespace Engine.Tests.Unit
             creator.Sets(multipleChoiceItem).To("Bangladesh");
             Assert.Equal(Succeeded, checklist.Status());
             creator.Reset(multipleChoiceItem);
-            Assert.Equal(InProgress, checklist.Status());
+            Assert.Equal(InProgress, checklist.Status());   
         }
     }
 }

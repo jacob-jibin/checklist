@@ -19,6 +19,11 @@ namespace Engine.Persons
 
         public CancelValidation Cancel(Item item) => new CancelValidation(this, item);
 
+        public InsertItemValidation Insert(Item firstItem, params Item[] items)
+        {
+            return new InsertItemValidation(this, firstItem, items);
+        }
+
         public ReplaceItemValidation Replace(Item itemTobeReplaced)
         {
             return new ReplaceItemValidation(this, itemTobeReplaced);
@@ -154,10 +159,10 @@ namespace Engine.Persons
 
             public void In(Checklist checklist)
             {
-                if(!checklist.Contains(_itemToBeReplaced))
+                if (!checklist.Contains(_itemToBeReplaced))
                     throw new InvalidOperationException("Item is not present in the Checklist");
                 if (!_person.Can(ModifyChecklist).To(checklist))
-                    throw new InvalidOperationException("Does not have permission to modify an Item");
+                    throw new InvalidOperationException("Does not have permission to modify checklist");
                 checklist.Replace(_itemToBeReplaced, _newItems.ToArray<Item>());
             }
 
@@ -166,6 +171,35 @@ namespace Engine.Persons
                 _newItems = items.ToList();
                 _newItems.Insert(0, firstItem);
                 return this;
+            }
+        }
+
+        public class InsertItemValidation
+        {
+            private readonly Person _person;
+            private readonly List<Item> _items;
+            private Item _insertAfterItem;
+
+            internal InsertItemValidation(Person person, Item firstItem, Item[] items)
+            {
+                _person = person;
+                _items = items.ToList();
+                _items.Insert(0, firstItem);
+            }
+
+            public InsertItemValidation After(Item insertAfterItem)
+            {
+                _insertAfterItem = insertAfterItem;
+                return this;
+            }
+
+            public void In(Checklist checklist)
+            {
+                if (!checklist.Contains(_insertAfterItem))
+                    throw new InvalidOperationException("Item is not present in the Checklist");
+                if (!_person.Can(ModifyChecklist).To(checklist))
+                    throw new InvalidOperationException("Does not have permission to modify checklist");
+                checklist.InsertAfter(_insertAfterItem, _items.ToArray<Item>());
             }
         }
     }

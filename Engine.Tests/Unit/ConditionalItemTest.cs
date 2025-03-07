@@ -1,5 +1,6 @@
 ﻿using Engine.Items;
 using Engine.Persons;
+using System;
 using Xunit;
 using static Engine.Items.ChecklistStatus;
 
@@ -53,7 +54,7 @@ namespace Engine.Tests.Unit
 
             var compositeItem = new ConditionalItem(baseItem, successItem: successItem);
             var checklist = new Checklist( creator, compositeItem);
-
+            Assert.Throws<InvalidOperationException>(() => creator.Sets(compositeItem).To(true));
             Assert.Equal(InProgress, checklist.Status());
             creator.Sets(baseItem).To(false);
             Assert.Equal(Failed, checklist.Status());
